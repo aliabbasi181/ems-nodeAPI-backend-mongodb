@@ -17,7 +17,6 @@ const { constants } = require("../helpers/constants");
 exports.checkUserFenseStatus = [
 	function(req, res){
 		let point = ""+req.body['userLocation'];
-
 		let	x = parseFloat(point.toString().split(',')[0]);
 		let	y = parseFloat(point.toString().split(',')[1]);
 		
@@ -186,4 +185,3 @@ let polygon = [new Point(51.4926437585727,-0.09932693656067305),
 	new Point(51.482025878759956,-0.1105993652343651),
     new Point(51.492715011705485,-0.0996702593145793),
 ];
-
