@@ -5,8 +5,16 @@ const apiResponse = require("../helpers/apiResponse");
 const auth = require("../middlewares/jwt");
 var mongoose = require("mongoose");
 mongoose.set("useFindAndModify", false);
+//require("../models/LatLng");
+// polygon Schema
 
-// Book Schema
+class LatLng{
+    constructor(x,y){
+        this.lat = x;
+        this.lng = y;
+    }
+}
+
 function PolygonData(data) {
 	this.id = data._id;
 	this.name= data.name;
@@ -20,12 +28,11 @@ function PolygonData(data) {
  * @returns {Object}
  */
 exports.polygonList = [
-	auth,
 	function (req, res) {
 		try {
 			Polygon.find().then((polygon)=>{
 				if(polygon.length > 0){
-					return apiResponse.successResponseWithData(res, "Operation success", polygons);
+					return apiResponse.successResponseWithData(res, "Operation success", polygon);
 				}else{
 					return apiResponse.successResponseWithData(res, "Operation success", []);
 				}
@@ -45,12 +52,11 @@ exports.polygonList = [
  * @returns {Object}
  */
 exports.polygonDetail = [
-	auth,
 	function (req, res) {
 		try {
-			console.log(req.body);
-			Book.findOne({_id: req.body.id}).then((polygon)=>{                
-				if(book !== null){
+			console.log(req.body.id);
+			Polygon.findOne({_id: req.body.id}).then((polygon)=>{                
+				if(polygon !== null){
 					let polygonData = new PolygonData(polygon);
 					return apiResponse.successResponseWithData(res, "Operation success", polygonData);
 				}else{
@@ -74,23 +80,17 @@ exports.polygonDetail = [
  * @returns {Object}
  */
 exports.polygonStore = [
-	auth,
-	body("name", "Name must not be empty.").isLength({ min: 1 }),
-	sanitizeBody("*").escape(),
 	(req, res) => {
-		console.log(req.body);
-		return;
 		try {
 			const errors = validationResult(req);
+			//console.log(req.body.points);
 			var polygon = new Polygon(
 				{ 	name: req.body.name,
 					user: req.user,
-					points: [{
-						lat: req.points.lat,
-						lng: req.points.lng
-					}]
+					points: req.body.points
 				});
 
+			console.log(polygon);	
 			if (!errors.isEmpty()) {
 				return apiResponse.validationErrorWithData(res, "Validation Error.", errors.array());
 			}

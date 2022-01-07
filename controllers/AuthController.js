@@ -20,11 +20,6 @@ const { constants } = require("../helpers/constants");
  * @returns {Object}
  */
 exports.register = [
-	// Validate fields.
-	body("firstName").isLength({ min: 1 }).trim().withMessage("First name must be specified.")
-		.isAlphanumeric().withMessage("First name has non-alphanumeric characters."),
-	body("lastName").isLength({ min: 1 }).trim().withMessage("Last name must be specified.")
-		.isAlphanumeric().withMessage("Last name has non-alphanumeric characters."),
 	body("email").isLength({ min: 1 }).trim().withMessage("Email must be specified.")
 		.isEmail().withMessage("Email must be a valid email address.").custom((value) => {
 			return UserModel.findOne({email : value}).then((user) => {
@@ -34,11 +29,6 @@ exports.register = [
 			});
 		}),
 	body("password").isLength({ min: 6 }).trim().withMessage("Password must be 6 characters or greater."),
-	// Sanitize fields.
-	sanitizeBody("firstName").escape(),
-	sanitizeBody("lastName").escape(),
-	sanitizeBody("email").escape(),
-	sanitizeBody("password").escape(),
 	// Process request after validation and sanitization.
 	(req, res) => {
 		try {
@@ -55,10 +45,12 @@ exports.register = [
 					// Create User object with escaped and trimmed data
 					var user = new UserModel(
 						{
-							firstName: req.body.firstName,
-							lastName: req.body.lastName,
+							name: req.body.name,
 							email: req.body.email,
 							password: hash,
+							cnic: req.body.cnic,
+							role: req.body.role,
+							designation: req.body.designation,
 							confirmOTP: otp,
 							isConfirmed: true
 						}

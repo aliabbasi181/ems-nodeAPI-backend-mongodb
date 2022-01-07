@@ -4,7 +4,7 @@ const PolygonController = require("../controllers/PolygonController");
 var router = express.Router();
 
 router.get("/", PolygonController.polygonList);
-router.get("/polygon", PolygonController.polygonDetail);
+router.get("/polygonDetail", PolygonController.polygonDetail);
 router.post("/", PolygonController.polygonStore);
 // router.put("/:id", BookController.bookUpdate);
 // router.delete("/:id", BookController.bookDelete);
