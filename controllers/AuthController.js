@@ -95,6 +95,16 @@ exports.register = [
  *
  * @returns {Object}
  */
+
+
+exports.testLogin = [
+	(req, res) => {
+		console.log(req.body);
+	}
+];
+
+
+
 exports.login = [
 	body("email").isLength({ min: 1 }).trim().withMessage("Email must be specified.")
 		.isEmail().withMessage("Email must be a valid email address."),
@@ -118,8 +128,13 @@ exports.login = [
 									if(user.status) {
 										let userData = {
 											_id: user._id,
-											firstName: user.firstName,
-											lastName: user.lastName,
+											name: user.name,
+											cnic: user.cnic,
+											designation: user.designation,
+											role: user.role,
+											phone: user.phone,
+											gender: user.gender,
+											address: user.address,
 											email: user.email,
 										};
 										//Prepare JWT token for authentication

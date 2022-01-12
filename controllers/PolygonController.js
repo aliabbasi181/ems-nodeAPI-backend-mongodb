@@ -80,6 +80,7 @@ exports.polygonDetail = [
  * @returns {Object}
  */
 exports.polygonStore = [
+	auth,
 	(req, res) => {
 		try {
 			const errors = validationResult(req);

@@ -3,6 +3,6 @@ const GeoController = require("../controllers/GeoController");
 
 var router = express.Router();
 
-router.get("/", GeoController.checkUserFenseStatus);
+router.post("/", GeoController.checkUserFenseStatus);
 
 module.exports = router;
