@@ -30,7 +30,7 @@ function PolygonData(data) {
 exports.polygonList = [
 	function (req, res) {
 		try {
-			Polygon.find().then((polygon)=>{
+			Polygon.find().sort({'createdAt' : -1}).then((polygon)=>{
 				if(polygon.length > 0){
 					return apiResponse.successResponseWithData(res, "Operation success", polygon);
 				}else{
@@ -84,14 +84,11 @@ exports.polygonStore = [
 	(req, res) => {
 		try {
 			const errors = validationResult(req);
-			//console.log(req.body.points);
 			var polygon = new Polygon(
 				{ 	name: req.body.name,
 					user: req.user,
 					points: req.body.points
 				});
-
-			console.log(polygon);	
 			if (!errors.isEmpty()) {
 				return apiResponse.validationErrorWithData(res, "Validation Error.", errors.array());
 			}
@@ -100,7 +97,7 @@ exports.polygonStore = [
 				polygon.save(function (err) {
 					if (err) { return apiResponse.ErrorResponse(res, err); }
 					let polygonData = new PolygonData(polygon);
-					return apiResponse.successResponseWithData(res,"Polygon add successfuly.", polygonData);
+					return apiResponse.successResponseWithData(res,"Fence add successfuly.", polygonData);
 				});
 			}
 		} catch (err) {
@@ -119,50 +116,39 @@ exports.polygonStore = [
  * 
  * @returns {Object}
  */
-exports.bookUpdate = [
+exports.polygonUpdate = [
 	auth,
-	body("title", "Title must not be empty.").isLength({ min: 1 }).trim(),
-	body("description", "Description must not be empty.").isLength({ min: 1 }).trim(),
-	body("isbn", "ISBN must not be empty").isLength({ min: 1 }).trim().custom((value,{req}) => {
-		return Book.findOne({isbn : value,user: req.user._id, _id: { "$ne": req.params.id }}).then(book => {
-			if (book) {
-				return Promise.reject("Book already exist with this ISBN no.");
-			}
-		});
-	}),
-	sanitizeBody("*").escape(),
 	(req, res) => {
 		try {
 			const errors = validationResult(req);
-			var book = new Book(
-				{ title: req.body.title,
-					description: req.body.description,
-					isbn: req.body.isbn,
-					_id:req.params.id
+			var polygon = new Polygon(
+				{ 	name: req.body.name,
+					user: req.user,
+					points: req.body.points
 				});
-
 			if (!errors.isEmpty()) {
 				return apiResponse.validationErrorWithData(res, "Validation Error.", errors.array());
 			}
 			else {
-				if(!mongoose.Types.ObjectId.isValid(req.params.id)){
+				if(!mongoose.Types.ObjectId.isValid(req.body.id)){
 					return apiResponse.validationErrorWithData(res, "Invalid Error.", "Invalid ID");
 				}else{
-					Book.findById(req.params.id, function (err, foundBook) {
+					Polygon.findById(req.body.id, function (err, foundPolygon) {
 						if(foundBook === null){
 							return apiResponse.notFoundResponse(res,"Book not exists with this id");
 						}else{
+							console.log(req.body.id);
 							//Check authorized user
-							if(foundBook.user.toString() !== req.user._id){
+							if(foundPolygon.user.toString() !== req.user._id){
 								return apiResponse.unauthorizedResponse(res, "You are not authorized to do this operation.");
 							}else{
 								//update book.
-								Book.findByIdAndUpdate(req.params.id, book, {},function (err) {
+								Polygon.findByIdAndUpdate(req.body.id, polygon, {},function (err) {
 									if (err) { 
 										return apiResponse.ErrorResponse(res, err); 
 									}else{
-										let bookData = new BookData(book);
-										return apiResponse.successResponseWithData(res,"Book update Success.", bookData);
+										let polygonData = new PolygonData(polygon);
+										return apiResponse.successResponseWithData(res,"Book update Success.", polygonData);
 									}
 								});
 							}
@@ -184,27 +170,28 @@ exports.bookUpdate = [
  * 
  * @returns {Object}
  */
-exports.bookDelete = [
+exports.polygonDelete = [
 	auth,
 	function (req, res) {
-		if(!mongoose.Types.ObjectId.isValid(req.params.id)){
+		if(!mongoose.Types.ObjectId.isValid(req.body.id)){
 			return apiResponse.validationErrorWithData(res, "Invalid Error.", "Invalid ID");
 		}
+		console.log(req.body.id);
 		try {
-			Book.findById(req.params.id, function (err, foundBook) {
-				if(foundBook === null){
-					return apiResponse.notFoundResponse(res,"Book not exists with this id");
+			Polygon.findById(req.body.id, function (err, foundPolygon) {
+				if(foundPolygon === null){
+					return apiResponse.notFoundResponse(res,"Polygon not exists with this id");
 				}else{
 					//Check authorized user
-					if(foundBook.user.toString() !== req.user._id){
+					if(foundPolygon.user.toString() !== req.user._id){
 						return apiResponse.unauthorizedResponse(res, "You are not authorized to do this operation.");
 					}else{
 						//delete book.
-						Book.findByIdAndRemove(req.params.id,function (err) {
+						Polygon.findByIdAndRemove(req.body.id,function (err) {
 							if (err) { 
 								return apiResponse.ErrorResponse(res, err); 
 							}else{
-								return apiResponse.successResponse(res,"Book delete Success.");
+								return apiResponse.successResponse(res,"Polygon delete Success.");
 							}
 						});
 					}

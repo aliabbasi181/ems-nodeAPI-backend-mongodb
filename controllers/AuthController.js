@@ -69,9 +69,11 @@ exports.register = [
 							if (err) { return apiResponse.ErrorResponse(res, err); }
 							let userData = {
 								_id: user._id,
-								firstName: user.firstName,
-								lastName: user.lastName,
-								email: user.email
+								name: req.body.name,
+								email: req.body.email,
+								cnic: req.body.cnic,
+								role: req.body.role,
+								designation: req.body.designation,
 							};
 							return apiResponse.successResponseWithData(res,"Registration Success.", userData);
 						});

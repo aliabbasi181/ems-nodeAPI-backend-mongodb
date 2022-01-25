@@ -6,8 +6,8 @@ var router = express.Router();
 router.get("/", PolygonController.polygonList);
 router.get("/polygonDetail", PolygonController.polygonDetail);
 router.post("/", PolygonController.polygonStore);
-// router.put("/:id", BookController.bookUpdate);
-// router.delete("/:id", BookController.bookDelete);
+router.post("/update", PolygonController.polygonUpdate);
+router.delete("/", PolygonController.polygonDelete);
 // router.get("/status", GeoController.checkUserFenseStatus);
 
 module.exports = router;
