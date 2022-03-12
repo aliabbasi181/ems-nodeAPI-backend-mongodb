@@ -1,9 +1,12 @@
 const Polygon = require("../models/PolygonModel");
+const AssignPolygon = require("../models/AssignRegionModel");
+const EmployeeModel = require("../models/EmployeeModel");
 const { body,validationResult } = require("express-validator");
 const { sanitizeBody } = require("express-validator");
 const apiResponse = require("../helpers/apiResponse");
 const auth = require("../middlewares/jwt");
 var mongoose = require("mongoose");
+const AssignRegionModel = require("../models/AssignRegionModel");
 mongoose.set("useFindAndModify", false);
 //require("../models/LatLng");
 // polygon Schema
@@ -107,6 +110,102 @@ exports.polygonStore = [
 	}
 ];
 
+exports.polygonAssign = [
+	auth,
+	(req, res) => {
+		try {
+			const errors = validationResult(req);
+			var assignRegion = new AssignRegionModel(
+				{
+					employee : req.body.employee_id,
+					region : req.body.region_id,
+					dateFrom: req.body.date_from,
+					dateTo: req.body.date_to,
+					startTime: req.body.start_time,
+					endTime: req.body.end_time,
+					user: req.user
+				}
+			);
+			if (!errors.isEmpty()) {
+				return apiResponse.validationErrorWithData(res, "Validation Error.", errors.array());
+			}
+			else {
+				EmployeeModel.findOne({_id: assignRegion.employee}).then((user) => {
+					if(user != null){
+						EmployeeModel.findOne({user: req.user}).then((data) => {
+							if(data != null){
+								Polygon.findOne({_id: assignRegion.region}).then((polygon) => {
+									if(polygon != null){
+										AssignPolygon.findOne({
+											$and:[
+												{
+													employee: assignRegion.employee,
+												},
+												{
+													region: assignRegion.region,
+												},
+												{
+													date: assignRegion.date,
+												},
+												{
+													startTime: assignRegion.startTime,
+												},
+												{
+													endTime: assignRegion.endTime,
+												},
+											]
+										}).then((assignedFence) =>{
+											if(assignedFence == null){
+												assignRegion.save(
+													function(err){
+														if (err) { return apiResponse.ErrorResponse(res, err); }
+														let assignedRegionData = new AssignRegionModel(assignRegion);
+														return apiResponse.successResponseWithData(res,"Fence assigned successfuly.", assignedRegionData);
+													}
+												);
+											}
+											else{
+												return apiResponse.ErrorResponse(res, "Same date, startTime, endTime are alredy assigned to this employee");
+											}
+										});
+									}
+									else{
+										return apiResponse.ErrorResponse(res, "Fence with this id not found");
+									}
+								});
+							}
+							else{
+								console.log("error");
+								return apiResponse.ErrorResponse(res, "This employee does not belongs to you.");
+							}
+						});
+					}
+					else{
+						return apiResponse.ErrorResponse(res, "Employee with this id not found");
+					}
+				});
+			}
+		} catch (err) {
+			//throw error in json response with status 500. 
+			return apiResponse.ErrorResponse(res, err);
+		}
+	}
+];
+
+// get assigned fences
+
+exports.getAssignedFences = [
+	auth, 
+	(req, res) => {
+		try{
+			AssignPolygon.find({})
+		}catch(ex){
+			//throw error in json response with status 500. 
+			return apiResponse.ErrorResponse(res, err);
+		}
+	}
+];
+
 /**
  * Book update.
  * 
@@ -119,6 +218,7 @@ exports.polygonStore = [
 exports.polygonUpdate = [
 	auth,
 	(req, res) => {
+		console.log(req.body);
 		try {
 			const errors = validationResult(req);
 			var polygon = new Polygon(
@@ -126,6 +226,7 @@ exports.polygonUpdate = [
 					user: req.user,
 					points: req.body.points
 				});
+				console.log(polygon.points);
 			if (!errors.isEmpty()) {
 				return apiResponse.validationErrorWithData(res, "Validation Error.", errors.array());
 			}

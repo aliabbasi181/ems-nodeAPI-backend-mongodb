@@ -1,11 +1,14 @@
 var mongoose = require("mongoose");
+var Schema = mongoose.Schema;
 
 var AssignRegionSchema = new mongoose.Schema({
-    user: { type: String, required: true },
+    employee: { type: String, required: true },
     region: { type: String, required: true },
-    date: {type: String},
+    dateFrom: {type: String},
+    dateTo: {type: String},
     startTime: {type: String},
     endTime: {type: String},
+    user: { type: Schema.ObjectId, ref: "User", required: true },
 }, {timestamps: true});
 
 

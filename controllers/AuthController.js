@@ -31,6 +31,7 @@ exports.register = [
 	body("password").isLength({ min: 6 }).trim().withMessage("Password must be 6 characters or greater."),
 	// Process request after validation and sanitization.
 	(req, res) => {
+		console.log(req.body);
 		try {
 			// Extract the validation errors from a request.
 			const errors = validationResult(req);
