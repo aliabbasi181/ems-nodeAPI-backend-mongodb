@@ -6,6 +6,7 @@ const auth = require("../middlewares/jwt");
 var mongoose = require("mongoose");
 mongoose.set("useFindAndModify", false);
 const AssignPolygon = require("../models/AssignRegionModel");
+const fs = require('fs')
 
 
 exports.addUserLocation = [
@@ -83,3 +84,6 @@ exports.addUserLocation = [
 		}
 	}
 ];
+
+
+
