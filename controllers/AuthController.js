@@ -8,6 +8,7 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const mailer = require("../helpers/mailer");
 const { constants } = require("../helpers/constants");
+const EmployeeModel = require("../models/EmployeeModel");
 
 /**
  * User registration.
@@ -122,12 +123,9 @@ exports.login = [
 			}else {
 				UserModel.findOne({email : req.body.email}).then(user => {
 					if (user) {
-						//Compare given password with db's hash.
 						bcrypt.compare(req.body.password,user.password,function (err,same) {
 							if(same){
-								//Check account confirmation.
 								if(true){
-									// Check User's account active or not.
 									if(user.status) {
 										let userData = {
 											_id: user._id,
@@ -156,11 +154,45 @@ exports.login = [
 									return apiResponse.unauthorizedResponse(res, "Account is not confirmed. Please confirm your account.");
 								}
 							}else{
+
 								return apiResponse.unauthorizedResponse(res, "Email or Password wrong.");
 							}
 						});
 					}else{
-						return apiResponse.unauthorizedResponse(res, "Email or Password wrong.");
+						EmployeeModel.findOne({email : req.body.email}).then(employee => {
+							if(employee){
+								bcrypt.compare(req.body.password,employee.password,function (err,same){
+									if(same){
+										let userData = {
+											_id: employee._id,
+											name: employee.name,
+											cnic: employee.cnic,
+											designation: employee.designation,
+											role: employee.role,
+											phone: employee.phone,
+											gender: employee.gender,
+											address: employee.address,
+											email: employee.email,
+										};
+										//Prepare JWT token for authentication
+										const jwtPayload = userData;
+										const jwtData = {
+											expiresIn: process.env.JWT_TIMEOUT_DURATION,
+										};
+										const secret = process.env.JWT_SECRET;
+										//Generated JWT token with Payload and secret.
+										userData.token = jwt.sign(jwtPayload, secret, jwtData);
+										return apiResponse.successResponseWithData(res,"Login Success.", userData);
+									}
+									else{
+										return apiResponse.unauthorizedResponse(res, "Password is wrong.");
+									}
+								});
+							}
+							else{
+								return apiResponse.unauthorizedResponse(res, "Email or Password wrong.");
+							}
+						});
 					}
 				});
 			}

@@ -88,3 +88,40 @@ exports.register = [
 			return apiResponse.ErrorResponse(res, err);
 		}
 	}];
+
+	exports.employeeList = [
+		auth,
+		function (req, res) {
+			try {
+				EmployeeModel.find({user: req.user._id},"").then((employee)=>{
+					if(employee.length > 0){
+						return apiResponse.successResponseWithData(res, "Operation success", employee);
+					}else{
+						return apiResponse.successResponseWithData(res, "Operation success", []);
+					}
+				});
+			} catch (err) {
+				//throw error in json response with status 500. 
+				return apiResponse.ErrorResponse(res, err);
+			}
+		}
+	];
+
+	exports.employeeDetail = [
+		auth,
+		function (req, res) {
+			console.log(req.params);
+			try {
+				EmployeeModel.findOne({_id: req.params.id},"").then((employee)=>{                
+					if(employee !== null){
+						return apiResponse.successResponseWithData(res, "Operation success", employee);
+					}else{
+						return apiResponse.successResponseWithData(res, "Employee not found", {});
+					}
+				});
+			} catch (err) {
+				//throw error in json response with status 500. 
+				return apiResponse.ErrorResponse(res, err);
+			}
+		}
+	];

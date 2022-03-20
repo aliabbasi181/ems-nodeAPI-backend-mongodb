@@ -126,6 +126,7 @@ exports.polygonAssign = [
 					user: req.user
 				}
 			);
+			console.log(assignRegion);
 			if (!errors.isEmpty()) {
 				return apiResponse.validationErrorWithData(res, "Validation Error.", errors.array());
 			}
