@@ -50,9 +50,9 @@ exports.register = [
 							name: req.body.name,
 							email: req.body.email,
 							password: hash,
-							cnic: req.body.cnic,
-							role: req.body.role,
-							designation: req.body.designation,
+							address: req.body.address,
+							role: "organization",
+							phone: req.body.phone,
 							confirmOTP: otp,
 							isConfirmed: true
 						}
@@ -73,9 +73,9 @@ exports.register = [
 								_id: user._id,
 								name: req.body.name,
 								email: req.body.email,
-								cnic: req.body.cnic,
-								role: req.body.role,
-								designation: req.body.designation,
+								phone: req.body.phone,
+								address: req.body.address,
+								role: "organization"
 							};
 							return apiResponse.successResponseWithData(res,"Registration Success.", userData);
 						});
@@ -104,6 +104,50 @@ exports.register = [
 exports.testLogin = [
 	(req, res) => {
 		console.log(req.body);
+	}
+];
+
+
+exports.organizationList = [
+	function (req, res) {
+		try {
+			UserModel.find({},"").then((organizations)=>{
+				if(organizations.length > 0){
+					return apiResponse.successResponseWithData(res, "Operation success", organizations);
+				}else{
+					return apiResponse.successResponseWithData(res, "Operation success", []);
+				}
+			});
+		} catch (err) {
+			//throw error in json response with status 500. 
+			return apiResponse.ErrorResponse(res, err);
+		}
+	}
+];
+
+exports.organizationDelete = [
+	function (req, res) {
+		// if(!mongoose.Types.ObjectId.isValid(req.params.id)){
+		// 	return apiResponse.validationErrorWithData(res, "Invalid Error.", "Invalid ID");
+		// }
+		try {
+			UserModel.findById(req.body.id, function (err, organization) {
+				if(organization === null){
+					return apiResponse.notFoundResponse(res,"organization not exists with this id");
+				}else{
+					UserModel.findByIdAndRemove(req.body.id,function (err) {
+						if (err) { 
+							return apiResponse.ErrorResponse(res, err); 
+						}else{
+							return apiResponse.successResponse(res,"Organization delete Success.");
+						}
+					});
+				}
+			});
+		} catch (err) {
+			//throw error in json response with status 500. 
+			return apiResponse.ErrorResponse(res, err);
+		}
 	}
 ];
 
