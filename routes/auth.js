@@ -5,9 +5,7 @@ var router = express.Router();
 
 router.post("/register", AuthController.register);
 router.post("/login", AuthController.login);
-router.post("/testLogin", AuthController.testLogin);
-router.post("/verify-otp", AuthController.verifyConfirm);
-router.post("/resend-verify-otp", AuthController.resendConfirmOtp);
+router.get("/organizations", AuthController.organizationList);
+router.delete("/delete", AuthController.organizationDelete);
 router.get("/getAccountInfo",AuthController.currentUserInfo)
-
 module.exports = router;
